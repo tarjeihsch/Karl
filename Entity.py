@@ -17,11 +17,8 @@ class Entity:
         self.location = (0, 0)
         self.movement_speed = 10.0
 
-    def update_animation(self, delta_time):
-        self.animation[self.animation_index].update(delta_time)
-
     def tick(self, delta_time):
-        self.update_animation(delta_time)
+        self.animation[self.animation_index].update(delta_time)
 
     def draw(self, canvas):
         canvas.create_image(self.location[0], self.location[1], image=self.animation[self.animation_index].get(), anchor="nw")

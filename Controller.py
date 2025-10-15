@@ -13,11 +13,11 @@ class PlayerController(Controller):
         pass
 
     def on_key_pressed(self, event):
-        if event.key == "w":
+        if event == "w":
             self.entity.move(Direction.UP)
-        if event.key == "s":
+        if event == "s":
             self.entity.move(Direction.DOWN)
-        if event.key == "a":
+        if event == "a":
             self.entity.move(Direction.LEFT)
-        if event.key == "d":
+        if event == "d":
             self.entity.move(Direction.RIGHT)

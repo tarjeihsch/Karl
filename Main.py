@@ -4,6 +4,7 @@ from Game import Game
 
 def app_started(app):
     app.game = Game()
+    app.pressed_keys = set()
 
     # Application time variables
     app.timer_delay = 16
@@ -12,14 +13,25 @@ def app_started(app):
     pass
 
 def key_pressed(app, event):
-    app.game.controllers[0].on_key_pressed(event)
-    pass
+    app.pressed_keys.add(event.key)
+
+def key_released(app, event):
+    app.pressed_keys.discard(event.key)
 
 def timer_fired(app):
     # Calculate time from last fixed step
     now = time.time()
     app.delta_time = now - app.last_time
     app.last_time = now
+
+    if 'a' in app.pressed_keys:
+        app.game.controllers[0].on_key_pressed("a")
+    if 'd' in app.pressed_keys:
+        app.game.controllers[0].on_key_pressed("d")
+    if 'w' in app.pressed_keys:
+        app.game.controllers[0].on_key_pressed("w")
+    if 's' in app.pressed_keys:
+        app.game.controllers[0].on_key_pressed("s")
 
     app.game.tick(app.delta_time)
 
