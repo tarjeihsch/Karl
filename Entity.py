@@ -7,7 +7,8 @@ class Entity:
 
         self.animation: dict[str, Animation] = {
             "Idle": Animation("Assets/Unarmed_Idle_with_shadow.png", 64, 64, 2),
-            "Walk": Animation("Assets/Unarmed_Walk_with_shadow.png", 64, 64, 2)
+            "Walk": Animation("Assets/Unarmed_Walk_with_shadow.png", 64, 64, 2),
+            "Run": Animation("Assets/Unarmed_Run_with_shadow.png", 64, 64, 2)
         }
 
         self.animation_index = "Idle"
@@ -19,6 +20,7 @@ class Entity:
         self.current_location = (0, 0)
 
         self.movement_speed = 2.0
+        self.movement_speed_multiplier = 1.75
 
     def tick(self, delta_time):
         self.animation[self.animation_index].update(delta_time)
@@ -26,9 +28,6 @@ class Entity:
         if self.last_location == self.current_location:
             if self.animation_index != "Idle":
                 self.animation_index = "Idle"
-        else:
-            if self.animation_index != "Walk":
-                self.animation_index = "Walk"
 
         self.last_location = self.current_location
         self.last_direction = self.current_direction
@@ -36,13 +35,20 @@ class Entity:
     def draw(self, canvas):
         canvas.create_image(self.current_location[0], self.current_location[1], image=self.animation[self.animation_index].get(self.current_direction), anchor="nw")
 
-    def move(self, direction: Direction):
+    def move(self, direction: Direction, running: bool):
         x, y = self.current_location
 
-        if direction == Direction.UP: y -= 1 * self.movement_speed
-        if direction == Direction.DOWN: y += 1 * self.movement_speed
-        if direction == Direction.LEFT: x -= 1 * self.movement_speed
-        if direction == Direction.RIGHT: x += 1 * self.movement_speed
+        if running:
+            self.animation_index = "Run"
+            speed = self.movement_speed * self.movement_speed_multiplier
+        else:
+            self.animation_index = "Walk"
+            speed = self.movement_speed
+
+        if direction == Direction.UP: y -= 1 * speed
+        if direction == Direction.DOWN: y += 1 * speed
+        if direction == Direction.LEFT: x -= 1 * speed
+        if direction == Direction.RIGHT: x += 1 * speed
 
         if self.current_direction != direction:
             # Reset animation counter, even when not playing the same sequence again

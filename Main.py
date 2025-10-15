@@ -13,10 +13,10 @@ def app_started(app):
     pass
 
 def key_pressed(app, event):
-    app.pressed_keys.add(event.key)
+    app.pressed_keys.add(event.key.lower())
 
 def key_released(app, event):
-    app.pressed_keys.discard(event.key)
+    app.pressed_keys.discard(event.key.lower())
 
 def timer_fired(app):
     # Calculate time from last fixed step
@@ -24,14 +24,16 @@ def timer_fired(app):
     app.delta_time = now - app.last_time
     app.last_time = now
 
+    sprinting = 'space' in app.pressed_keys
+
     if 'a' in app.pressed_keys:
-        app.game.controllers[0].on_key_pressed("a")
+        app.game.controllers[0].on_key_pressed("a", sprinting)
     elif 'd' in app.pressed_keys:
-        app.game.controllers[0].on_key_pressed("d")
+        app.game.controllers[0].on_key_pressed("d", sprinting)
     elif 'w' in app.pressed_keys:
-        app.game.controllers[0].on_key_pressed("w")
+        app.game.controllers[0].on_key_pressed("w", sprinting)
     elif 's' in app.pressed_keys:
-        app.game.controllers[0].on_key_pressed("s")
+        app.game.controllers[0].on_key_pressed("s", sprinting)
 
     app.game.tick(app.delta_time)
 
