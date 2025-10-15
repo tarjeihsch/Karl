@@ -26,11 +26,11 @@ def timer_fired(app):
 
     if 'a' in app.pressed_keys:
         app.game.controllers[0].on_key_pressed("a")
-    if 'd' in app.pressed_keys:
+    elif 'd' in app.pressed_keys:
         app.game.controllers[0].on_key_pressed("d")
-    if 'w' in app.pressed_keys:
+    elif 'w' in app.pressed_keys:
         app.game.controllers[0].on_key_pressed("w")
-    if 's' in app.pressed_keys:
+    elif 's' in app.pressed_keys:
         app.game.controllers[0].on_key_pressed("s")
 
     app.game.tick(app.delta_time)
