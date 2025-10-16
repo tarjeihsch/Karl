@@ -12,12 +12,14 @@ class PlayerController(Controller):
         self.entity = entity
         pass
 
-    def on_key_pressed(self, event, sprinting):
+    def on_key_pressed(self, game, delta_time, event, sprinting):
         if event == "w":
-            self.entity.move(Direction.UP, sprinting)
+            self.entity.move(game, delta_time, Direction.UP, sprinting)
         if event == "s":
-            self.entity.move(Direction.DOWN, sprinting)
+            self.entity.move(game, delta_time, Direction.DOWN, sprinting)
         if event == "a":
-            self.entity.move(Direction.LEFT, sprinting)
+            self.entity.move(game, delta_time, Direction.LEFT, sprinting)
         if event == "d":
-            self.entity.move(Direction.RIGHT, sprinting)
+            self.entity.move(game, delta_time, Direction.RIGHT, sprinting)
+        if event == "k":
+            self.entity.die()

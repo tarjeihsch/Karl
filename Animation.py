@@ -5,13 +5,14 @@ from Direction import Direction
 # F, L, R, B
 
 class Animation:
-    def __init__(self, path, frame_width, frame_height, scale):
+    def __init__(self, path, frame_width, frame_height, scale, cycle = True):
         image = Image.open(path)
 
         self.frame = 0
         self.frames = {d: [] for d in [Direction.DOWN, Direction.LEFT, Direction.RIGHT, Direction.UP]}
-        self.frame_time = 0.1
+        self.frame_duration = 0.1
         self.frame_timer = 0
+        self.cycle = cycle
 
         # One width covers one directional animation sequence.
         # Populate each direction with the sequence from each width
@@ -30,8 +31,9 @@ class Animation:
         self.frame_timer = 0
 
     def update(self, delta_time):
+        if not self.cycle and self.frame == (len(self.frames) - 1): return
         self.frame_timer += delta_time
-        if self.frame_timer > self.frame_time:
+        if self.frame_timer > self.frame_duration:
             self.frame = (self.frame + 1) % len(self.frames)
             self.frame_timer = 0
 

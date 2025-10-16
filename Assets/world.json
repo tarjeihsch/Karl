@@ -1,0 +1,42 @@
+{
+    "world": {
+        "tiles": [
+            {"pos": [0, 6], "type": "grass", "collision": false},
+            {"pos": [1, 6], "type": "grass", "collision": false},
+            {"pos": [2, 6], "type": "grass", "collision": false},
+            {"pos": [3, 6], "type": "grass", "collision": false},
+            {"pos": [4, 6], "type": "grass", "collision": false},
+            {"pos": [5, 6], "type": "grass", "collision": false},
+            {"pos": [6, 6], "type": "grass", "collision": false},
+            {"pos": [7, 6], "type": "grass", "collision": false},
+            {"pos": [8, 6], "type": "grass", "collision": false},
+            {"pos": [9, 6], "type": "grass", "collision": false},
+            {"pos": [10, 6], "type": "grass", "collision": false},
+            {"pos": [11, 6], "type": "grass", "collision": false},
+            {"pos": [0, 7], "type": "water", "collision": true},
+            {"pos": [1, 7], "type": "water", "collision": true},
+            {"pos": [2, 7], "type": "water", "collision": true},
+            {"pos": [3, 7], "type": "water", "collision": true},
+            {"pos": [4, 7], "type": "water", "collision": true},
+            {"pos": [5, 7], "type": "water", "collision": true},
+            {"pos": [6, 7], "type": "water", "collision": true},
+            {"pos": [7, 7], "type": "water", "collision": true},
+            {"pos": [8, 7], "type": "water", "collision": true},
+            {"pos": [9, 7], "type": "water", "collision": true},
+            {"pos": [10, 7], "type": "water", "collision": true},
+            {"pos": [11, 7], "type": "water", "collision": true},
+            {"pos": [0, 8], "type": "floor", "collision": false},
+            {"pos": [1, 8], "type": "floor", "collision": false},
+            {"pos": [2, 8], "type": "floor", "collision": false},
+            {"pos": [3, 8], "type": "floor", "collision": false},
+            {"pos": [4, 8], "type": "floor", "collision": false},
+            {"pos": [5, 8], "type": "floor", "collision": false},
+            {"pos": [6, 8], "type": "floor", "collision": false},
+            {"pos": [7, 8], "type": "floor", "collision": false},
+            {"pos": [8, 8], "type": "floor", "collision": false},
+            {"pos": [9, 8], "type": "floor", "collision": false},
+            {"pos": [10, 8], "type": "floor", "collision": false},
+            {"pos": [11, 8], "type": "floor", "collision": false}
+        ]
+    }
+}

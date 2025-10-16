@@ -1,10 +1,16 @@
+from Collider import Collider
 from Player import Player
 from Controller import PlayerController
+from Scene import Scene
+
 
 class Game:
     def __init__(self):
+        self.scene = Scene("Assets/world.json")
+
         self.entities = []
         self.controllers = []
+        self.colliders = []
 
         player = Player()
         player_controller = PlayerController()
@@ -19,6 +25,12 @@ class Game:
         for obj in self.entities:
             obj.tick(delta_time)
 
-    def draw(self, delta_time):
+    def draw(self, canvas, delta_time):
+        self.scene.draw(canvas)
+
         for obj in self.entities:
-            obj.draw(delta_time)
+            obj.draw(canvas)
+
+        for obj in self.colliders:
+            if obj.debug_draw:
+                obj.draw(canvas)

@@ -27,22 +27,22 @@ def timer_fired(app):
     sprinting = 'space' in app.pressed_keys
 
     if 'a' in app.pressed_keys:
-        app.game.controllers[0].on_key_pressed("a", sprinting)
+        app.game.controllers[0].on_key_pressed(app.game, app.delta_time, "a", sprinting)
     elif 'd' in app.pressed_keys:
-        app.game.controllers[0].on_key_pressed("d", sprinting)
+        app.game.controllers[0].on_key_pressed(app.game, app.delta_time, "d", sprinting)
     elif 'w' in app.pressed_keys:
-        app.game.controllers[0].on_key_pressed("w", sprinting)
+        app.game.controllers[0].on_key_pressed(app.game, app.delta_time, "w", sprinting)
     elif 's' in app.pressed_keys:
-        app.game.controllers[0].on_key_pressed("s", sprinting)
+        app.game.controllers[0].on_key_pressed(app.game, app.delta_time, "s", sprinting)
+    elif 'k' in app.pressed_keys:
+        app.game.controllers[0].on_key_pressed(app.game, app.delta_time, "k", sprinting)
 
     app.game.tick(app.delta_time)
 
     pass
 
 def redraw_all(app, canvas):
-    app.game.draw(canvas)
-
-    pass
+    app.game.draw(canvas, 0)
 
 if __name__ == '__main__':
     run_app(width=1280, height=720)
