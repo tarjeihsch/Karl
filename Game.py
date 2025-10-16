@@ -12,7 +12,7 @@ class Game:
         player_controller = PlayerController()
         self.controllers.append(player_controller)
 
-        self.load_scene("assets/house.json")
+        self.load_scene("world.json")
 
     def load_scene(self, path):
         self.scene = Scene(path)

@@ -10,7 +10,7 @@ def app_started(app):
     app.timer_delay = 16
     app.last_time = time.time()
     app.delta_time = 0.0
-    app.debug_draw = True
+    app.debug_draw = False
     pass
 
 def key_pressed(app, event):
