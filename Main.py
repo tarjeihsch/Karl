@@ -10,6 +10,7 @@ def app_started(app):
     app.timer_delay = 16
     app.last_time = time.time()
     app.delta_time = 0.0
+    app.debug_draw = True
     pass
 
 def key_pressed(app, event):
@@ -43,6 +44,12 @@ def timer_fired(app):
 
 def redraw_all(app, canvas):
     app.game.draw(canvas, 0)
+
+    if app.debug_draw:
+        canvas.create_rectangle(15, 15, 120, 120, fill="gray")
+        fps = 0 if app.delta_time == 0 else 1.0 / app.delta_time
+        canvas.create_text(60, 60, text=f"FPS: {fps:.1f}")
+
 
 if __name__ == '__main__':
     run_app(width=1280, height=720)

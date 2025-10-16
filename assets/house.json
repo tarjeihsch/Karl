@@ -1,0 +1,109 @@
+{
+    "world": {
+        "start_location": [256, 256],
+        "textures": [
+            {"name": "grass", "path": "assets/grass.png"},
+            {"name": "water", "path": "assets/water.png"},
+            {"name": "floor", "path": "assets/floor.png"}
+        ],
+        "trigger": [
+            {
+                "scene": [
+                    {"pos": [8, 3], "path": "assets/outside.json"}
+                ]
+            }
+        ],
+        "tiles": [
+            {"pos": [5, 3], "texture": "floor", "collision": true},
+            {"pos": [6, 3], "texture": "floor", "collision": false},
+            {"pos": [7, 3], "texture": "floor", "collision": false},
+            {"pos": [8, 3], "texture": "floor", "collision": false},
+            {"pos": [9, 3], "texture": "floor", "collision": false},
+            {"pos": [10, 3], "texture": "floor", "collision": false},
+            {"pos": [11, 3], "texture": "floor", "collision": false},
+            {"pos": [12, 3], "texture": "floor", "collision": false},
+            {"pos": [13, 3], "texture": "floor", "collision": false},
+            {"pos": [14, 3], "texture": "floor", "collision": false},
+            {"pos": [15, 3], "texture": "floor", "collision": false},
+            {"pos": [16, 3], "texture": "floor", "collision": false},
+
+            {"pos": [5, 4], "texture": "floor", "collision": true},
+            {"pos": [6, 4], "texture": "floor", "collision": false},
+            {"pos": [7, 4], "texture": "floor", "collision": false},
+            {"pos": [8, 4], "texture": "floor", "collision": false},
+            {"pos": [9, 4], "texture": "floor", "collision": false},
+            {"pos": [10, 4], "texture": "floor", "collision": false},
+            {"pos": [11, 4], "texture": "floor", "collision": false},
+            {"pos": [12, 4], "texture": "floor", "collision": false},
+            {"pos": [13, 4], "texture": "floor", "collision": false},
+            {"pos": [14, 4], "texture": "floor", "collision": false},
+            {"pos": [15, 4], "texture": "floor", "collision": false},
+            {"pos": [16, 4], "texture": "floor", "collision": false},
+
+            {"pos": [5, 5], "texture": "floor", "collision": true},
+            {"pos": [6, 5], "texture": "floor", "collision": false},
+            {"pos": [7, 5], "texture": "floor", "collision": false},
+            {"pos": [8, 5], "texture": "floor", "collision": false},
+            {"pos": [9, 5], "texture": "floor", "collision": false},
+            {"pos": [10, 5], "texture": "floor", "collision": false},
+            {"pos": [11, 5], "texture": "floor", "collision": false},
+            {"pos": [12, 5], "texture": "floor", "collision": false},
+            {"pos": [13, 5], "texture": "floor", "collision": false},
+            {"pos": [14, 5], "texture": "floor", "collision": false},
+            {"pos": [15, 5], "texture": "floor", "collision": false},
+            {"pos": [16, 5], "texture": "floor", "collision": false},
+
+            {"pos": [5, 6], "texture": "floor", "collision": true},
+            {"pos": [6, 6], "texture": "floor", "collision": false},
+            {"pos": [7, 6], "texture": "floor", "collision": false},
+            {"pos": [8, 6], "texture": "floor", "collision": false},
+            {"pos": [9, 6], "texture": "floor", "collision": false},
+            {"pos": [10, 6], "texture": "floor", "collision": false},
+            {"pos": [11, 6], "texture": "floor", "collision": false},
+            {"pos": [12, 6], "texture": "floor", "collision": false},
+            {"pos": [13, 6], "texture": "floor", "collision": false},
+            {"pos": [14, 6], "texture": "floor", "collision": false},
+            {"pos": [15, 6], "texture": "floor", "collision": false},
+            {"pos": [16, 6], "texture": "floor", "collision": false},
+
+            {"pos": [5, 7], "texture": "floor", "collision": true},
+            {"pos": [6, 7], "texture": "floor", "collision": false},
+            {"pos": [7, 7], "texture": "floor", "collision": false},
+            {"pos": [8, 7], "texture": "floor", "collision": false},
+            {"pos": [9, 7], "texture": "floor", "collision": false},
+            {"pos": [10, 7], "texture": "floor", "collision": false},
+            {"pos": [11, 7], "texture": "floor", "collision": false},
+            {"pos": [12, 7], "texture": "floor", "collision": false},
+            {"pos": [13, 7], "texture": "floor", "collision": false},
+            {"pos": [14, 7], "texture": "floor", "collision": false},
+            {"pos": [15, 7], "texture": "floor", "collision": false},
+            {"pos": [16, 7], "texture": "floor", "collision": false},
+
+            {"pos": [5, 8], "texture": "floor", "collision": true},
+            {"pos": [6, 8], "texture": "floor", "collision": false},
+            {"pos": [7, 8], "texture": "floor", "collision": false},
+            {"pos": [8, 8], "texture": "floor", "collision": false},
+            {"pos": [9, 8], "texture": "floor", "collision": false},
+            {"pos": [10, 8], "texture": "floor", "collision": false},
+            {"pos": [11, 8], "texture": "floor", "collision": false},
+            {"pos": [12, 8], "texture": "floor", "collision": false},
+            {"pos": [13, 8], "texture": "floor", "collision": false},
+            {"pos": [14, 8], "texture": "floor", "collision": false},
+            {"pos": [15, 8], "texture": "floor", "collision": false},
+            {"pos": [16, 8], "texture": "floor", "collision": false},
+
+            {"pos": [5, 9], "texture": "floor", "collision": true},
+            {"pos": [6, 9], "texture": "floor", "collision": false},
+            {"pos": [7, 9], "texture": "floor", "collision": false},
+            {"pos": [8, 9], "texture": "floor", "collision": false},
+            {"pos": [9, 9], "texture": "floor", "collision": false},
+            {"pos": [10, 9], "texture": "floor", "collision": false},
+            {"pos": [11, 9], "texture": "floor", "collision": false},
+            {"pos": [12, 9], "texture": "floor", "collision": false},
+            {"pos": [13, 9], "texture": "floor", "collision": false},
+            {"pos": [14, 9], "texture": "floor", "collision": false},
+            {"pos": [15, 9], "texture": "floor", "collision": false},
+            {"pos": [16, 9], "texture": "floor", "collision": false}
+        ]
+    }
+}

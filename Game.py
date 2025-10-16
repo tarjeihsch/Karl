@@ -6,31 +6,24 @@ from Scene import Scene
 
 class Game:
     def __init__(self):
-        self.scene = Scene("Assets/world.json")
-
-        self.entities = []
+        self.scene = None
         self.controllers = []
-        self.colliders = []
 
-        player = Player()
         player_controller = PlayerController()
-        player_controller.possess(player)
-
-        self.entities.append(player)
         self.controllers.append(player_controller)
 
-        pass
+        self.load_scene("assets/house.json")
+
+    def load_scene(self, path):
+        self.scene = Scene(path)
+        self.controllers[0].possess(self.scene.entities[0])
 
     def tick(self, delta_time):
-        for obj in self.entities:
+        for obj in self.scene.entities:
             obj.tick(delta_time)
 
     def draw(self, canvas, delta_time):
         self.scene.draw(canvas)
 
-        for obj in self.entities:
+        for obj in self.scene.entities:
             obj.draw(canvas)
-
-        for obj in self.colliders:
-            if obj.debug_draw:
-                obj.draw(canvas)

@@ -1,0 +1,31 @@
+{
+    "world": {
+        "start_location": [500, 500],
+        "textures": [
+            {"name": "grass", "path": "assets/grass.png"},
+            {"name": "water", "path": "assets/water.png"},
+            {"name": "floor", "path": "assets/floor.png"}
+        ],
+        "trigger": [
+            {
+                "scene": [
+                    {"pos": [8, 3], "path": "assets/house.json"}
+                ]
+            }
+        ],
+        "tiles": [
+            {"pos": [5, 3], "texture": "grass", "collision": true},
+            {"pos": [6, 3], "texture": "grass", "collision": false},
+            {"pos": [7, 3], "texture": "grass", "collision": false},
+            {"pos": [8, 3], "texture": "grass", "collision": false},
+            {"pos": [9, 3], "texture": "grass", "collision": false},
+            {"pos": [10, 3], "texture": "grass", "collision": false},
+            {"pos": [11, 3], "texture": "grass", "collision": false},
+            {"pos": [12, 3], "texture": "grass", "collision": false},
+            {"pos": [13, 3], "texture": "grass", "collision": false},
+            {"pos": [14, 3], "texture": "grass", "collision": false},
+            {"pos": [15, 3], "texture": "grass", "collision": false},
+            {"pos": [16, 3], "texture": "grass", "collision": false}
+        ]
+    }
+}
