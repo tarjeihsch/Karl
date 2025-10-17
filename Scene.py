@@ -109,9 +109,19 @@ class Scene:
                     if gid in collision_trigger:
                         self.triggers.append(Trigger(x * tile_size, y * tile_size, "cave.json"))
 
+        start_location_x = 0
+        start_location_y = 0
+
+        if "properties" in data:
+            for property in data["properties"]:
+                if property["name"] == "start_location_x" and property["value"]:
+                    start_location_x = property["value"]
+                if property["name"] == "start_location_y" and property["value"]:
+                    start_location_y = property["value"]
+
         player = Player()
-        player.current_location = (0, 0)
-        player.last_location = (0, 0)
+        player.current_location = (start_location_x, start_location_y)
+        player.last_location = (start_location_x, start_location_y)
         self.entities.append(player)
 
         self.framebuffer = framebuffer
