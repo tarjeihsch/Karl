@@ -109,10 +109,9 @@ class Scene:
         self.framebuffer_image = ImageTk.PhotoImage(self.framebuffer)
         print(f"Framebuffer: {(self.framebuffer.width * self.framebuffer.height * 4) / 1024 / 1024} MB")
 
-
     def draw(self, canvas):
         canvas.create_rectangle(0, 0, 1920, 1080, fill="#141413")
         canvas.create_image(0, 0, image=self.framebuffer_image, anchor="nw")
 
-        for tile in self.tiles:
-            canvas.create_rectangle(tile.location[0], tile.location[1], tile.location[0] + 64, tile.location[1] + 64, outline="orange", width=4)
+        #for tile in self.tiles:
+        #    canvas.create_rectangle(tile.location[0], tile.location[1], tile.location[0] + 32, tile.location[1] + 32, outline="orange", width=4)

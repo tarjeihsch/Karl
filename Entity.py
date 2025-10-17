@@ -66,11 +66,11 @@ class Entity:
 
         for collider in game.scene.tiles:
             # If we are moving into a collider, abort
-            if collider.location[0] <= x <= collider.location[0] + 64 and collider.location[1] <= y <= collider.location[1] + 64:
+            if collider.location[0] <= x <= collider.location[0] + 32 and collider.location[1] <= y <= collider.location[1] + 32:
                 return
 
         for trigger in game.scene.triggers:
-            if trigger.location[0] <= x <= trigger.location[0] + 64 and trigger.location[1] <= y <= trigger.location[1] + 64:
+            if trigger.location[0] <= x <= trigger.location[0] + 32 and trigger.location[1] <= y <= trigger.location[1] + 32:
                 game.load_scene(trigger.path)
 
         self.current_location = x, y

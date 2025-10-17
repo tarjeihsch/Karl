@@ -6,13 +6,22 @@
     "activeFile": "",
     "expandedProjectPaths": [
     ],
+    "file.lastUsedOpenFilter": "All Files (*)",
     "fileStates": {
         "": {
-            "scaleInDock": 1
+            "scaleInDock": 1,
+            "scaleInEditor": 1
         },
         "assets/TX Tileset Grass.tsx": {
             "scaleInDock": 1,
             "scaleInEditor": 1
+        },
+        "assets/TX Tileset Wall.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "world.json#TX Tileset Wall": {
+            "dynamicWrapping": false
         }
     },
     "last.exportedFilePath": "/home/acad/Workspace/Karl",
@@ -22,7 +31,9 @@
     "openFiles": [
     ],
     "project": "Karl.tiled-project",
+    "property.type": "bool",
     "recentFiles": [
+        "assets/TX Tileset Wall.tsx",
         "assets/TX Tileset Grass.tsx"
     ],
     "tileset.lastUsedFormat": "tsx"
