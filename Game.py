@@ -16,14 +16,13 @@ class Game:
 
     def load_scene(self, path):
         self.scene = Scene(path)
-        self.controllers[0].possess(self.scene.entities[0])
+        for player in self.scene.entities:
+            if isinstance(player, Player):
+                self.controllers[0].possess(player)
 
     def tick(self, delta_time):
         for obj in self.scene.entities:
-            obj.tick(delta_time)
+            obj.tick(self, delta_time)
 
     def draw(self, canvas, delta_time):
         self.scene.draw(canvas)
-
-        for obj in self.scene.entities:
-            obj.draw(canvas)

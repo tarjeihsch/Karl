@@ -10,8 +10,7 @@ def app_started(app):
     app.timer_delay = 16
     app.last_time = time.time()
     app.delta_time = 0.0
-    app.debug_draw = False
-    pass
+    app.debug_draw = True
 
 def key_pressed(app, event):
     app.pressed_keys.add(event.key.lower())
@@ -28,15 +27,15 @@ def timer_fired(app):
     sprinting = 'space' in app.pressed_keys
 
     if 'a' in app.pressed_keys:
-        app.game.controllers[0].on_key_pressed(app.game, app.delta_time, "a", sprinting)
+        app.game.controllers[0].move_player(app.game, app.delta_time, "a", sprinting)
     elif 'd' in app.pressed_keys:
-        app.game.controllers[0].on_key_pressed(app.game, app.delta_time, "d", sprinting)
+        app.game.controllers[0].move_player(app.game, app.delta_time, "d", sprinting)
     elif 'w' in app.pressed_keys:
-        app.game.controllers[0].on_key_pressed(app.game, app.delta_time, "w", sprinting)
+        app.game.controllers[0].move_player(app.game, app.delta_time, "w", sprinting)
     elif 's' in app.pressed_keys:
-        app.game.controllers[0].on_key_pressed(app.game, app.delta_time, "s", sprinting)
+        app.game.controllers[0].move_player(app.game, app.delta_time, "s", sprinting)
     elif 'k' in app.pressed_keys:
-        app.game.controllers[0].on_key_pressed(app.game, app.delta_time, "k", sprinting)
+        app.game.controllers[0].kill_player()
 
     app.game.tick(app.delta_time)
 

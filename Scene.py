@@ -1,5 +1,6 @@
 import json
 
+from Enemy import Enemy
 from Player import Player
 
 
@@ -118,6 +119,8 @@ class Scene:
                     start_location_x = property["value"]
                 if property["name"] == "start_location_y" and property["value"]:
                     start_location_y = property["value"]
+                if property["name"] == "monster" and property["value"]:
+                    self.entities.append(Enemy())
 
         player = Player()
         player.current_location = (start_location_x, start_location_y)
@@ -129,8 +132,19 @@ class Scene:
         print(f"Framebuffer: {(self.framebuffer.width * self.framebuffer.height * 4) / 1024 / 1024} MB")
 
     def draw(self, canvas):
-        canvas.create_rectangle(0, 0, 2560, 1600, fill="#141413")
-        canvas.create_image(0, 0, image=self.framebuffer_image, anchor="nw")
+        w = canvas.winfo_width()
+        h = canvas.winfo_height()
+        fb_w = self.framebuffer_image.width()
+        fb_h = self.framebuffer_image.height()
+
+        offset_x = (w - fb_w) / 2
+        offset_y = (h - fb_h) / 2
+
+        canvas.create_rectangle(0, 0, canvas.winfo_width(), canvas.winfo_height(), fill="black", outline="")
+        canvas.create_image(offset_x,  offset_y, image=self.framebuffer_image, anchor="nw")
+
+        for entity in self.entities:
+            entity.draw(canvas, offset_x, offset_y)
 
         #for tile in self.tiles:
         #    canvas.create_rectangle(tile.location[0], tile.location[1], tile.location[0] + 32, tile.location[1] + 32, outline="orange", width=4)
