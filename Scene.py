@@ -146,5 +146,7 @@ class Scene:
         for entity in self.entities:
             entity.draw(canvas, offset_x, offset_y)
 
+        
+
         #for tile in self.tiles:
         #    canvas.create_rectangle(tile.location[0], tile.location[1], tile.location[0] + 32, tile.location[1] + 32, outline="orange", width=4)

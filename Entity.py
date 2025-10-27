@@ -3,7 +3,7 @@ from Direction import Direction
 
 class Entity:
     def __init__(self):
-        self.health = 100
+        self.health = 6
         self.animation: dict[str, Animation] = {}
 
         self.animation_index = None

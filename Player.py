@@ -1,6 +1,7 @@
 from Animation import Animation
 from Direction import Direction
 from Entity import Entity
+from texture2d import Texture2D
 
 class Player(Entity):
     def __init__(self):
@@ -15,6 +16,7 @@ class Player(Entity):
         }
 
         self.animation_index = "Idle"
+        self.heart_texture = Texture2D("assets/Pixel Heart Sprite Sheet 32x32.png", 32, 32)
 
     def move(self, game, delta_time, direction: Direction, sprint: bool):
         super().move(game, delta_time, direction, sprint)
@@ -49,3 +51,26 @@ class Player(Entity):
         self.current_location = x, y
         self.last_direction = self.current_direction
         self.current_direction = direction
+
+    def draw(self, canvas, offset_x, offset_y):
+        super().draw(canvas, offset_x, offset_y)
+
+        w = canvas.winfo_width()
+        h = canvas.winfo_height()
+        self.health = 3
+        self.max_health = 6
+        hearts = self.max_health // 2  # 3 hearts
+
+        for i in range(hearts):
+            x = self.current_location[0] + 25 * (i + 1) + 96
+            y = self.current_location[1] - 25
+            heart_health = self.health - i * 2
+
+            if heart_health >= 2:
+                frame = self.heart_texture.frames[0]  # full
+            elif heart_health == 1:
+                frame = self.heart_texture.frames[1]  # half
+            else:
+                frame = self.heart_texture.frames[2]  # empty
+
+            canvas.create_image(x, y, image=frame)
