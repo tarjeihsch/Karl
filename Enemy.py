@@ -26,6 +26,7 @@ class Enemy(Entity):
 
         self.animation_state = "Idle"
         self.points = []
+        self.has_target = False
 
     # ChatGPT has been used to help design the A* pathfinding algorithm
     def move(self, game, delta_time, direction, sprint):
@@ -41,6 +42,8 @@ class Enemy(Entity):
             return
 
         min_distance = 64  # pixels
+        max_distance = min_distance * 4
+
         dx = player.current_location[0] - self.current_location[0]
         dy = player.current_location[1] - self.current_location[1]
         distance_sq = dx * dx + dy * dy
@@ -53,6 +56,10 @@ class Enemy(Entity):
             #    self.animation_state = "Attack"
             #    self.animation[self.animation_state].reset()
 
+            return
+
+        if distance_sq > max_distance * max_distance and not self.has_target:
+            self.points = []
             return
 
         tile_size = 32
@@ -99,6 +106,8 @@ class Enemy(Entity):
         if not path:
             return
 
+        self.has_target = True
+
         next_tile = path[0]
         tx, ty = pos_from_tile(tile_size, next_tile)
         x, y = self.current_location
@@ -140,8 +149,9 @@ class Enemy(Entity):
         w = canvas.winfo_width()
         h = canvas.winfo_height()
 
-        canvas.create_text(w / 2, 25, text="Boss", fill="white")
-        canvas.create_rectangle(w * 0.25, 55, w * 0.75, 90, fill="red", outline="gray", width=4)
+        if self.has_target:
+            canvas.create_text(w / 2, 25, text="Boss", fill="white")
+            canvas.create_rectangle(w * 0.25, 55, w * 0.75, 90, fill="red", outline="gray", width=4)
 
         if self.debug_draw:
             tile_size = 32
