@@ -36,6 +36,8 @@ def timer_fired(app):
         app.game.controllers[0].move_player(app.game, app.delta_time, "s", sprinting)
     elif 'k' in app.pressed_keys:
         app.game.controllers[0].kill_player()
+    elif 'f' in app.pressed_keys:
+        app.game.controllers[0].attack(app.game)
 
     app.game.tick(app.delta_time)
 

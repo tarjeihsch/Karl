@@ -8,25 +8,57 @@ class Player(Entity):
         super().__init__()
 
         self.animation: dict[str, Animation] = {
-            "Idle": Animation("assets/Unarmed_Idle_with_shadow.png", 64, 64, 2),
-            "Walk": Animation("assets/Unarmed_Walk_with_shadow.png", 64, 64, 2),
-            "Run": Animation("assets/Unarmed_Run_with_shadow.png", 64, 64, 2),
-            "Hurt": Animation("assets/Unarmed_Hurt_with_shadow.png", 64, 64, 2),
-            "Death": Animation("assets/Unarmed_Death_with_shadow.png", 64, 64, 2, False)
+            "Idle": Animation("assets/Unarmed_Idle_with_shadow.png", 64, 64, 2, [(Direction.DOWN, 12), (Direction.LEFT, 12), (Direction.RIGHT, 12), (Direction.UP, 4)]),
+            "Walk": Animation("assets/Unarmed_Walk_with_shadow.png", 64, 64, 2, [(Direction.DOWN, 6), (Direction.LEFT, 6), (Direction.RIGHT, 6), (Direction.UP, 6)]),
+            "Run": Animation("assets/Unarmed_Run_with_shadow.png", 64, 64, 2, [(Direction.DOWN, 8), (Direction.LEFT, 8), (Direction.RIGHT, 8), (Direction.UP, 8)]),
+            "Hurt": Animation("assets/Unarmed_Hurt_with_shadow.png", 64, 64, 2, [(Direction.DOWN, 5), (Direction.LEFT, 5), (Direction.RIGHT, 5), (Direction.UP, 5)]),
+            "Death": Animation("assets/Unarmed_Death_with_shadow.png", 64, 64, 2, [(Direction.DOWN, 7), (Direction.LEFT, 7), (Direction.RIGHT, 7), (Direction.UP, 7)], False)
         }
-
-        self.animation_index = "Idle"
+    
+        self.animation_state = "Idle"
         self.heart_texture = Texture2D("assets/Pixel Heart Sprite Sheet 32x32.png", 32, 32)
+
+    def attack(self, game):
+        x, y = self.current_location
+        trace_end = self.current_location
+        trace_length = 32 * 5
+
+        # TODO: prefer using a switch
+        if self.current_direction == Direction.UP:
+            trace_end = (x, y - trace_length)
+        elif self.current_direction == Direction.DOWN:
+            trace_end = (x, y + trace_length)
+        elif self.current_direction == Direction.LEFT:
+            trace_end = (x - trace_length, y)
+        elif self.current_direction == Direction.RIGHT:
+            trace_end = (x + trace_length, y)
+
+        for entity in game.scene.entities:
+            if isinstance(entity, Player):
+                # Skip self
+                continue
+
+            box_w, box_h = self.collision_box_size
+            x1, y1 = self.current_location
+            x2, y2 = trace_end
+
+            min_x = min(x1, x2) - box_w / 2
+            max_x = max(x1, x2) + box_w / 2
+            min_y = min(y1, y2) - box_h / 2
+            max_y = max(y1, y2) + box_h / 2
+
+            if min_x <= entity.current_location[0] <= max_x and min_y <= entity.current_location[1] <= max_y:
+                entity.on_attacked()
 
     def move(self, game, delta_time, direction: Direction, sprint: bool):
         super().move(game, delta_time, direction, sprint)
         x, y = self.current_location
 
         if sprint:
-            self.animation_index = "Run"
+            self.animation_state = "Run"
             base_speed = self.movement_speed * self.movement_speed_multiplier
         else:
-            self.animation_index = "Walk"
+            self.animation_state = "Walk"
             base_speed = self.movement_speed
 
         if direction == Direction.UP: y -= 1 * base_speed * delta_time
@@ -37,7 +69,7 @@ class Player(Entity):
         if self.current_direction != direction:
             # Reset animation counter, even when not playing the same sequence again
             # Start new animation depending on direction
-            self.animation[self.animation_index].reset()
+            self.animation[self.animation_state].reset()
 
         for collider in game.scene.tiles:
             # If we are moving into a collider, abort
@@ -54,23 +86,3 @@ class Player(Entity):
 
     def draw(self, canvas, offset_x, offset_y):
         super().draw(canvas, offset_x, offset_y)
-
-        w = canvas.winfo_width()
-        h = canvas.winfo_height()
-        self.health = 3
-        self.max_health = 6
-        hearts = self.max_health // 2  # 3 hearts
-
-        for i in range(hearts):
-            x = self.current_location[0] + 25 * (i + 1) + 96
-            y = self.current_location[1] - 25
-            heart_health = self.health - i * 2
-
-            if heart_health >= 2:
-                frame = self.heart_texture.frames[0]  # full
-            elif heart_health == 1:
-                frame = self.heart_texture.frames[1]  # half
-            else:
-                frame = self.heart_texture.frames[2]  # empty
-
-            canvas.create_image(x, y, image=frame)

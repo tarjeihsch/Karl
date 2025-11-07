@@ -6,22 +6,32 @@ from Entity import Entity
 from Player import Player
 
 
+def tile_from_pos(tile_size, pos):
+    return int(pos[0] // tile_size), int(pos[1] // tile_size)
+
+def pos_from_tile(tile_size, tile):
+    return tile[0] * tile_size + tile_size / 2, tile[1] * tile_size + tile_size / 2
+
 class Enemy(Entity):
     def __init__(self):
         super().__init__()
 
         self.animation: dict[str, Animation] = {
-            "Idle": Animation("assets/Unarmed_Idle_with_shadow.png", 64, 64, 2),
-            "Walk": Animation("assets/Unarmed_Walk_with_shadow.png", 64, 64, 2),
-            "Run": Animation("assets/Unarmed_Run_with_shadow.png", 64, 64, 2),
-            "Hurt": Animation("assets/Unarmed_Hurt_with_shadow.png", 64, 64, 2),
-            "Death": Animation("assets/Unarmed_Death_with_shadow.png", 64, 64, 2, False),
+            "Idle": Animation("assets/Vampires1/Vampires1_Idle_with_shadow.png", 64, 64, 2, [(Direction.DOWN, 4), (Direction.UP, 4), (Direction.LEFT, 4), (Direction.RIGHT, 4)], True),
+            "Walk": Animation("assets/Vampires1/Vampires1_Walk_with_shadow.png", 64, 64, 2, [(Direction.DOWN, 6), (Direction.UP, 6), (Direction.LEFT, 6), (Direction.RIGHT, 6)], True),
+            "Hurt": Animation("assets/Vampires1/Vampires1_Hurt_with_shadow.png", 64, 64, 2, [(Direction.DOWN, 4), (Direction.UP, 4), (Direction.LEFT, 4), (Direction.RIGHT, 4)], False),
+            "Death": Animation("assets/Vampires1/Vampires1_Death_with_shadow.png", 64, 64, 2, [(Direction.DOWN, 10), (Direction.UP, 10), (Direction.LEFT, 10), (Direction.RIGHT, 10)], False),
+            "Attack": Animation("assets/Vampires1/Vampires1_Attack_with_shadow.png", 64, 64, 2, [(Direction.DOWN, 12), (Direction.UP, 12), (Direction.LEFT, 12), (Direction.RIGHT, 12)], False),
         }
 
-        self.animation_index = "Idle"
+        self.animation_state = "Idle"
         self.points = []
 
+    # ChatGPT has been used to help design the A* pathfinding algorithm
     def move(self, game, delta_time, direction, sprint):
+        if self.animation_state == "Hurt":
+            return
+
         player = None
         for e in game.scene.entities:
             if isinstance(e, Player):
@@ -30,17 +40,26 @@ class Enemy(Entity):
         if player is None:
             return
 
+        min_distance = 64  # pixels
+        dx = player.current_location[0] - self.current_location[0]
+        dy = player.current_location[1] - self.current_location[1]
+        distance_sq = dx * dx + dy * dy
+        if distance_sq < min_distance * min_distance:
+            # Already close enough; stop moving
+            self.points = []
+
+            #if self.animation_state != "Attack":
+            #    self.previous_animation_state = "Idle"
+            #    self.animation_state = "Attack"
+            #    self.animation[self.animation_state].reset()
+
+            return
+
         tile_size = 32
         blocked = {(t.location[0] // tile_size, t.location[1] // tile_size) for t in game.scene.tiles}
 
-        def tile_from_pos(pos):
-            return int(pos[0] // tile_size), int(pos[1] // tile_size)
-
-        def pos_from_tile(tile):
-            return tile[0] * tile_size + tile_size / 2, tile[1] * tile_size + tile_size / 2
-
-        start = tile_from_pos(self.current_location)
-        goal = tile_from_pos(player.current_location)
+        start = tile_from_pos(tile_size, self.current_location)
+        goal = tile_from_pos(tile_size, player.current_location)
 
         def heuristic(a, b):
             return abs(a[0] - b[0]) + abs(a[1] - b[1])
@@ -81,7 +100,7 @@ class Enemy(Entity):
             return
 
         next_tile = path[0]
-        tx, ty = pos_from_tile(next_tile)
+        tx, ty = pos_from_tile(tile_size, next_tile)
         x, y = self.current_location
 
         dx = tx - x
@@ -109,7 +128,7 @@ class Enemy(Entity):
                 self.current_direction = Direction.UP
 
         self.current_location = (x, y)
-        self.animation_index = "Walk"
+        self.animation_state = "Walk"
 
     def tick(self, game, delta_time):
         self.move(game, delta_time, Direction.DOWN, False)
@@ -124,16 +143,15 @@ class Enemy(Entity):
         canvas.create_text(w / 2, 25, text="Boss", fill="white")
         canvas.create_rectangle(w * 0.25, 55, w * 0.75, 90, fill="red", outline="gray", width=4)
 
-        if not self.debug_draw or not self.points:
-            return
+        if self.debug_draw:
+            tile_size = 32
 
-        tile_size = 32
+            for tile in self.points:
+                tx, ty = tile[0] * tile_size + tile_size / 2, tile[1] * tile_size + tile_size / 2
+                x0, y0 = offset_x + tx - tile_size / 2, offset_y + ty - tile_size / 2
+                x1, y1 = offset_x + tx + tile_size / 2, offset_y + ty + tile_size / 2
+                canvas.create_rectangle(x0, y0, x1, y1, outline="red", width=1)
 
-        def pos_from_tile(tile):
-            return tile[0] * tile_size + tile_size / 2, tile[1] * tile_size + tile_size / 2
+    def on_attacked(self):
+        super().on_attacked()
 
-        for tile in self.points:
-            tx, ty = pos_from_tile(tile)
-            x0, y0 = offset_x + tx - tile_size / 2, offset_y + ty - tile_size / 2
-            x1, y1 = offset_x + tx + tile_size / 2, offset_y + ty + tile_size / 2
-            canvas.create_rectangle(x0, y0, x1, y1, outline="red", width=1)

@@ -5,7 +5,7 @@ class Texture2D:
         self.image = Image.open(path)
         self.frame_width = frame_width
         self.frame_height = frame_height
-        self.scale = 1.1
+        self.scale = 1.0
         self.frames = []
 
         sheet_width, sheet_height = self.image.size

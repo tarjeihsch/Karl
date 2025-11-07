@@ -20,5 +20,8 @@ class PlayerController(Controller):
         if event == "d":
             self.entity.move(game, delta_time, Direction.RIGHT, sprinting)
 
+    def attack(self, game):
+        self.entity.attack(game)
+
     def kill_player(self):
         self.entity.die()

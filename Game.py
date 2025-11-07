@@ -26,3 +26,6 @@ class Game:
 
     def draw(self, canvas, delta_time):
         self.scene.draw(canvas)
+
+    def remove_entity(self, entity):
+        self.scene.entities.remove(entity)

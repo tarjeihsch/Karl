@@ -81,12 +81,12 @@
         {
          "name":"start_location_x",
          "type":"float",
-         "value":100
+         "value":500
         }, 
         {
          "name":"start_location_y",
          "type":"float",
-         "value":100
+         "value":250
         }],
  "renderorder":"right-down",
  "tiledversion":"1.11.2",
