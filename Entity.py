@@ -58,14 +58,26 @@ class Entity:
 
     def on_attacked(self):
         if not self.animation[self.animation_state].cycle:
-            # As the Hurt animation is a non cyclic animation, we wait for the animation to finish before allowing a new attack.
+            # As the Hurt animation is a non-cyclic animation, we wait for the animation to finish before allowing a new attack.
             return
 
-        self.health -= 10
+        self.health -= 26
 
         if self.health <= 0:
             self.die()
             return
+
+        (x, y) = self.current_location
+
+        match self.current_direction:
+            case Direction.UP:
+                self.current_location = (x, y - 10)
+            case Direction.DOWN:
+                self.current_location = (x, y + 10)
+            case Direction.LEFT:
+                self.current_location = (x + 10, y)
+            case Direction.RIGHT:
+                self.current_location = (x - 10, y)
 
         # Cache the prev. animation index to restore after Hurt is played
         self.previous_animation_state = self.animation_state

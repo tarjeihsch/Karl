@@ -1,6 +1,8 @@
 from uib_inf100_graphics.event_app import run_app
 import time
 from Game import Game
+from texture_atlas import TextureAtlas
+
 
 def app_started(app):
     app.game = Game()

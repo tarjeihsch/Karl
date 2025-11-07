@@ -1,25 +1,19 @@
 import json
-
+from PIL import Image, ImageTk
 from Enemy import Enemy
 from Player import Player
 
-
-# A large issue with our framework TKinter is computational expensive draw call operations.
-# Need to read all cubes from the json file to populate the static world map as data.
-# Next is to convert all data into corresponding textures for their respective type (eg. Stone, Wall, Water).
-# After this, we create a framebuffer and store the framebuffer as an image used to render the entire scene
-
-import json
-from PIL import Image, ImageTk
 
 class Tile:
     def __init__(self, x, y):
         self.location = (x, y)
 
+
 class Trigger:
     def __init__(self, x, y, path):
         self.location = (x, y)
         self.path = path
+
 
 class Scene:
     def __init__(self, filename: str):
@@ -29,107 +23,109 @@ class Scene:
         self.entities = []
         self.framebuffer = None
         self.framebuffer_image = None
+        self.center_camera = True
         self.create_scene()
 
     def create_scene(self):
-        data = json.load(open(self.filename))
-        textures = {}
+        with open(self.filename, "r") as f:
+            data = json.load(f)
 
-        for ts in data["tilesets"]:
-            image_path = ts.get("image")
-            if image_path:
-                textures[ts["name"]] = Image.open(image_path)
-
-        layers = data["layers"]
         tile_size = data["tilewidth"]
         width = data["width"]
         height = data["height"]
+        fb_width = width * tile_size
+        fb_height = height * tile_size
+
+        # Cache tileset data
+        textures = {}
+        tilesets = data["tilesets"]
+
+        # Manual sort by firstgid (faster than lambda key)
+        for i in range(len(tilesets) - 1):
+            for j in range(i + 1, len(tilesets)):
+                if tilesets[i]["firstgid"] > tilesets[j]["firstgid"]:
+                    tilesets[i], tilesets[j] = tilesets[j], tilesets[i]
 
         collision_tiles = set()
         collision_trigger = set()
 
-        for ts in data["tilesets"]:
+        for ts in tilesets:
+            image_path = ts.get("image")
+            if image_path:
+                textures[ts["name"]] = Image.open(image_path).convert("RGBA")
+
             firstgid = ts["firstgid"]
             for tile in ts.get("tiles", []):
-                for prop in tile.get("properties", []):
-                    if prop["name"] == "collision" and prop["value"]:
-                        collision_tiles.add(tile["id"] + firstgid)
-                    if prop["name"] == "path" and prop["value"]:
-                        collision_trigger.add(tile["id"] + firstgid)
+                props = {p["name"]: p["value"] for p in tile.get("properties", [])}
+                if props.get("collision"):
+                    collision_tiles.add(tile["id"] + firstgid)
+                if props.get("path"):
+                    collision_trigger.add(tile["id"] + firstgid)
 
-        fb_width = width * tile_size
-        fb_height = height * tile_size
+        # Precompute gid → tileset map for faster lookup
+        gid_to_tileset = []
+        for i, ts in enumerate(tilesets):
+            next_gid = tilesets[i + 1]["firstgid"] if i + 1 < len(tilesets) else 10**9
+            gid_to_tileset.append((range(ts["firstgid"], next_gid), ts))
+
         framebuffer = Image.new("RGBA", (fb_width, fb_height), (0, 0, 0, 0))
 
-        tilesets = sorted(data["tilesets"], key=lambda t: t["firstgid"])
-
-        for layer in layers:
+        for layer in data["layers"]:
             if layer["type"] != "tilelayer":
                 continue
 
-            layer_img = Image.new("RGBA", (fb_width, fb_height), (0, 0, 0, 0))
             layer_data = layer["data"]
+            layer_img = Image.new("RGBA", (fb_width, fb_height), (0, 0, 0, 0))
+            paste = layer_img.paste
 
-            for y in range(height):
-                for x in range(width):
-                    gid = layer_data[y * width + x]
-                    if gid == 0:
-                        continue
+            for idx, gid in enumerate(layer_data):
+                if gid == 0:
+                    continue
 
-                    tileset = None
-                    for i, ts in enumerate(tilesets):
-                        next_gid = tilesets[i + 1]["firstgid"] if i + 1 < len(tilesets) else float("inf")
-                        if ts["firstgid"] <= gid < next_gid:
-                            tileset = ts
-                            break
-                    if not tileset:
-                        continue
+                tileset = next((ts for rng, ts in gid_to_tileset if gid in rng), None)
+                if not tileset:
+                    continue
 
-                    image = textures.get(tileset["name"])
-                    if not image:
-                        continue
+                image = textures.get(tileset["name"])
+                if not image:
+                    continue
 
-                    columns = tileset["columns"]
-                    tile_w = tileset["tilewidth"]
-                    tile_h = tileset["tileheight"]
-                    local_id = gid - tileset["firstgid"]
+                columns = tileset["columns"]
+                tile_w = tileset["tilewidth"]
+                tile_h = tileset["tileheight"]
+                local_id = gid - tileset["firstgid"]
 
-                    sx = (local_id % columns) * tile_w
-                    sy = (local_id // columns) * tile_h
-                    tile_img = image.crop((sx, sy, sx + tile_w, sy + tile_h))
+                sx = (local_id % columns) * tile_w
+                sy = (local_id // columns) * tile_h
+                tile_img = image.crop((sx, sy, sx + tile_w, sy + tile_h))
 
-                    # paste tile into this layer image using its own alpha
-                    layer_img.paste(tile_img, (x * tile_size, y * tile_size), tile_img)
+                x = (idx % width) * tile_size
+                y = (idx // width) * tile_size
+                paste(tile_img, (x, y), tile_img)
 
-                    # blend this layer on top of the main framebuffer
-                    framebuffer = Image.alpha_composite(framebuffer, layer_img)
+                if gid in collision_tiles:
+                    self.tiles.append(Tile(x, y))
+                elif gid in collision_trigger:
+                    self.triggers.append(Trigger(x, y, "cave.json"))
 
-                    if gid in collision_tiles:
-                        self.tiles.append(Tile(x * tile_size, y * tile_size))
+            framebuffer = Image.alpha_composite(framebuffer, layer_img)
 
-                    if gid in collision_trigger:
-                        self.triggers.append(Trigger(x * tile_size, y * tile_size, "cave.json"))
+        # Parse map-level properties
+        props = {p["name"]: p["value"] for p in data.get("properties", [])}
+        start_x = props.get("start_location_x", 0)
+        start_y = props.get("start_location_y", 0)
 
-        start_location_x = 0
-        start_location_y = 0
-
-        if "properties" in data:
-            for property in data["properties"]:
-                if property["name"] == "start_location_x" and property["value"]:
-                    start_location_x = property["value"]
-                if property["name"] == "start_location_y" and property["value"]:
-                    start_location_y = property["value"]
-                if property["name"] == "monster" and property["value"]:
-                    self.entities.append(Enemy())
+        if props.get("monster"):
+            self.entities.append(Enemy())
 
         player = Player()
-        player.current_location = (start_location_x, start_location_y)
-        player.last_location = (start_location_x, start_location_y)
+        player.current_location = (start_x, start_y)
+        player.last_location = (start_x, start_y)
         self.entities.append(player)
 
         self.framebuffer = framebuffer
-        self.framebuffer_image = ImageTk.PhotoImage(self.framebuffer)
-        print(f"Framebuffer: {(self.framebuffer.width * self.framebuffer.height * 4) / 1024 / 1024} MB")
+        self.framebuffer_image = ImageTk.PhotoImage(framebuffer)
+        print(f"Framebuffer: {(fb_width * fb_height * 4) / 1024 / 1024:.2f} MB")
 
     def draw(self, canvas):
         w = canvas.winfo_width()
@@ -137,16 +133,19 @@ class Scene:
         fb_w = self.framebuffer_image.width()
         fb_h = self.framebuffer_image.height()
 
-        offset_x = (w - fb_w) / 2
-        offset_y = (h - fb_h) / 2
+        if self.center_camera:
+            player = None
+            for entity in self.entities:
+                if isinstance(entity, Player):
+                    player = entity
+            offset_x = w / 2 - player.current_location[0]
+            offset_y = h / 2 - player.current_location[1]
+        else:
+            offset_x = (w - fb_w) / 2
+            offset_y = (h - fb_h) / 2
 
-        canvas.create_rectangle(0, 0, canvas.winfo_width(), canvas.winfo_height(), fill="black", outline="")
-        canvas.create_image(offset_x,  offset_y, image=self.framebuffer_image, anchor="nw")
+        canvas.create_rectangle(0, 0, w, h, fill="black", outline="")
+        canvas.create_image(offset_x, offset_y, image=self.framebuffer_image, anchor="nw")
 
         for entity in self.entities:
             entity.draw(canvas, offset_x, offset_y)
-
-        
-
-        #for tile in self.tiles:
-        #    canvas.create_rectangle(tile.location[0], tile.location[1], tile.location[0] + 32, tile.location[1] + 32, outline="orange", width=4)

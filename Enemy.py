@@ -17,16 +17,17 @@ class Enemy(Entity):
         super().__init__()
 
         self.animation: dict[str, Animation] = {
-            "Idle": Animation("assets/Vampires1/Vampires1_Idle_with_shadow.png", 64, 64, 2, [(Direction.DOWN, 4), (Direction.UP, 4), (Direction.LEFT, 4), (Direction.RIGHT, 4)], True),
-            "Walk": Animation("assets/Vampires1/Vampires1_Walk_with_shadow.png", 64, 64, 2, [(Direction.DOWN, 6), (Direction.UP, 6), (Direction.LEFT, 6), (Direction.RIGHT, 6)], True),
-            "Hurt": Animation("assets/Vampires1/Vampires1_Hurt_with_shadow.png", 64, 64, 2, [(Direction.DOWN, 4), (Direction.UP, 4), (Direction.LEFT, 4), (Direction.RIGHT, 4)], False),
-            "Death": Animation("assets/Vampires1/Vampires1_Death_with_shadow.png", 64, 64, 2, [(Direction.DOWN, 10), (Direction.UP, 10), (Direction.LEFT, 10), (Direction.RIGHT, 10)], False),
-            "Attack": Animation("assets/Vampires1/Vampires1_Attack_with_shadow.png", 64, 64, 2, [(Direction.DOWN, 12), (Direction.UP, 12), (Direction.LEFT, 12), (Direction.RIGHT, 12)], False),
+            "Idle": Animation("assets/Enemy/PNG/Orc1/With_shadow/orc1_idle_with_shadow.png", 64, 64, 2, [(Direction.DOWN, 4), (Direction.UP, 4), (Direction.LEFT, 4), (Direction.RIGHT, 4)], True),
+            "Walk": Animation("assets/Enemy/PNG/Orc1/With_shadow/orc1_walk_with_shadow.png", 64, 64, 2, [(Direction.DOWN, 6), (Direction.UP, 6), (Direction.LEFT, 6), (Direction.RIGHT, 6)], True),
+            "Hurt": Animation("assets/Enemy/PNG/Orc1/With_shadow/orc1_hurt_with_shadow.png", 64, 64, 2, [(Direction.DOWN, 6), (Direction.UP, 6), (Direction.LEFT, 6), (Direction.RIGHT, 6)], False),
+            "Death": Animation("assets/Enemy/PNG/Orc1/With_shadow/orc1_death_with_shadow.png", 64, 64, 2, [(Direction.DOWN, 8), (Direction.UP, 8), (Direction.LEFT, 8), (Direction.RIGHT, 8)], False),
+            "Attack": Animation("assets/Enemy/PNG/Orc1/With_shadow/orc1_attack_with_shadow.png", 64, 64, 2, [(Direction.DOWN, 8), (Direction.UP, 8), (Direction.LEFT, 8), (Direction.RIGHT, 8)], False),
         }
 
         self.animation_state = "Idle"
         self.points = []
         self.has_target = False
+        self.cooldown = 1
 
     # ChatGPT has been used to help design the A* pathfinding algorithm
     def move(self, game, delta_time, direction, sprint):
@@ -51,10 +52,10 @@ class Enemy(Entity):
             # Already close enough; stop moving
             self.points = []
 
-            #if self.animation_state != "Attack":
-            #    self.previous_animation_state = "Idle"
-            #    self.animation_state = "Attack"
-            #    self.animation[self.animation_state].reset()
+            if self.animation_state != "Attack" and self.cooldown > 1.0:
+                self.previous_animation_state = "Idle"
+                self.animation_state = "Attack"
+                self.animation[self.animation_state].reset()
 
             return
 
@@ -140,6 +141,8 @@ class Enemy(Entity):
         self.animation_state = "Walk"
 
     def tick(self, game, delta_time):
+        self.cooldown += delta_time
+
         self.move(game, delta_time, Direction.DOWN, False)
         super().tick(game, delta_time)
 
@@ -149,9 +152,26 @@ class Enemy(Entity):
         w = canvas.winfo_width()
         h = canvas.winfo_height()
 
+        (x, y) = self.current_location
+
+        (x, y) = self.current_location
+
         if self.has_target:
-            canvas.create_text(w / 2, 25, text="Boss", fill="white")
-            canvas.create_rectangle(w * 0.25, 55, w * 0.75, 90, fill="red", outline="gray", width=4)
+            bar_width = 75
+            bar_height = 5
+            health_ratio = max(0, min(1, self.health / 100))
+
+            # bar position (same offset you used)
+            x0 = x + offset_x - 40
+            y0 = y + offset_y - 60
+            x1 = x0 + bar_width
+            y1 = y0 - bar_height
+
+            # background
+            canvas.create_rectangle(x0, y1, x1, y0, fill="gray", outline="black", width=1)
+
+            # foreground (current health)
+            canvas.create_rectangle(x0, y1, x0 + bar_width * health_ratio, y0, fill="red", outline="")
 
         if self.debug_draw:
             tile_size = 32
@@ -165,3 +185,4 @@ class Enemy(Entity):
     def on_attacked(self):
         super().on_attacked()
 
+        self.cooldown = 0

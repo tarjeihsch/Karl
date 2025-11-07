@@ -8,20 +8,28 @@ class Player(Entity):
         super().__init__()
 
         self.animation: dict[str, Animation] = {
-            "Idle": Animation("assets/Unarmed_Idle_with_shadow.png", 64, 64, 2, [(Direction.DOWN, 12), (Direction.LEFT, 12), (Direction.RIGHT, 12), (Direction.UP, 4)]),
-            "Walk": Animation("assets/Unarmed_Walk_with_shadow.png", 64, 64, 2, [(Direction.DOWN, 6), (Direction.LEFT, 6), (Direction.RIGHT, 6), (Direction.UP, 6)]),
-            "Run": Animation("assets/Unarmed_Run_with_shadow.png", 64, 64, 2, [(Direction.DOWN, 8), (Direction.LEFT, 8), (Direction.RIGHT, 8), (Direction.UP, 8)]),
-            "Hurt": Animation("assets/Unarmed_Hurt_with_shadow.png", 64, 64, 2, [(Direction.DOWN, 5), (Direction.LEFT, 5), (Direction.RIGHT, 5), (Direction.UP, 5)]),
-            "Death": Animation("assets/Unarmed_Death_with_shadow.png", 64, 64, 2, [(Direction.DOWN, 7), (Direction.LEFT, 7), (Direction.RIGHT, 7), (Direction.UP, 7)], False)
+            "Idle": Animation("assets/Player/PNG/Swordsman_lvl1/With_shadow/Swordsman_lvl1_Idle_with_shadow.png", 64, 64, 2, [(Direction.DOWN, 12), (Direction.LEFT, 12), (Direction.RIGHT, 12), (Direction.UP, 4)]),
+            "Walk": Animation("assets/Player/PNG/Swordsman_lvl1/With_shadow/Swordsman_lvl1_Walk_with_shadow.png", 64, 64, 2, [(Direction.DOWN, 6), (Direction.LEFT, 6), (Direction.RIGHT, 6), (Direction.UP, 6)]),
+            "Run": Animation("assets/Player/PNG/Swordsman_lvl1/With_shadow/Swordsman_lvl1_Run_with_shadow.png", 64, 64, 2, [(Direction.DOWN, 8), (Direction.LEFT, 8), (Direction.RIGHT, 8), (Direction.UP, 8)]),
+            "Attack": Animation("assets/Player/PNG/Swordsman_lvl1/With_shadow/Swordsman_lvl1_attack_with_shadow.png", 64, 64, 2, [(Direction.DOWN, 8), (Direction.LEFT, 8), (Direction.RIGHT, 8), (Direction.UP, 8)], False),
+            "Hurt": Animation("assets/Player/PNG/Swordsman_lvl1/With_shadow/Swordsman_lvl1_Hurt_with_shadow.png", 64, 64, 2, [(Direction.DOWN, 5), (Direction.LEFT, 5), (Direction.RIGHT, 5), (Direction.UP, 5)]),
+            "Death": Animation("assets/Player/PNG/Swordsman_lvl1/With_shadow/Swordsman_lvl1_Death_with_shadow.png", 64, 64, 2, [(Direction.DOWN, 7), (Direction.LEFT, 7), (Direction.RIGHT, 7), (Direction.UP, 7)], False)
         }
-    
+
         self.animation_state = "Idle"
         self.heart_texture = Texture2D("assets/Pixel Heart Sprite Sheet 32x32.png", 32, 32)
 
     def attack(self, game):
+        if self.animation_state == "Attack":
+            return
+
+        self.animation_state = "Attack"
+        self.previous_animation_state = "Idle"
+        self.animation[self.animation_state].reset()
+
         x, y = self.current_location
         trace_end = self.current_location
-        trace_length = 32 * 5
+        trace_length = 32 * 2
 
         # TODO: prefer using a switch
         if self.current_direction == Direction.UP:
@@ -51,6 +59,9 @@ class Player(Entity):
                 entity.on_attacked()
 
     def move(self, game, delta_time, direction: Direction, sprint: bool):
+        if self.animation_state == "Attack":
+            return
+
         super().move(game, delta_time, direction, sprint)
         x, y = self.current_location
 
