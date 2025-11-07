@@ -6,7 +6,7 @@ class UIElement:
         self.height = height
         self.visible = True
 
-    def draw(self):
+    def draw(self, canvas):
         pass
 
     def update(self, delta_time):

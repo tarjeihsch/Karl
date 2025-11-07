@@ -1,4 +1,6 @@
 import json
+import random
+
 from PIL import Image, ImageTk
 from Enemy import Enemy
 from Player import Player
@@ -14,18 +16,25 @@ class Trigger:
         self.location = (x, y)
         self.path = path
 
+class Consumable:
+    def __init__(self, x, y, health):
+        self.location = (x, y)
+        self.health = health
 
 class Scene:
     def __init__(self, filename: str):
         self.filename = filename
         self.triggers = []
         self.tiles = []
+        self.consumables = []
         self.entities = []
         self.framebuffer = None
         self.framebuffer_image = None
         self.center_camera = True
         self.create_scene()
+        self.last_camera_location = (0, 0)
 
+    # Note: ChatGPT has been used to help design this JSON data parser
     def create_scene(self):
         with open(self.filename, "r") as f:
             data = json.load(f)
@@ -36,11 +45,9 @@ class Scene:
         fb_width = width * tile_size
         fb_height = height * tile_size
 
-        # Cache tileset data
         textures = {}
         tilesets = data["tilesets"]
 
-        # Manual sort by firstgid (faster than lambda key)
         for i in range(len(tilesets) - 1):
             for j in range(i + 1, len(tilesets)):
                 if tilesets[i]["firstgid"] > tilesets[j]["firstgid"]:
@@ -48,6 +55,7 @@ class Scene:
 
         collision_tiles = set()
         collision_trigger = set()
+        collision_consumables = set()
 
         for ts in tilesets:
             image_path = ts.get("image")
@@ -61,8 +69,9 @@ class Scene:
                     collision_tiles.add(tile["id"] + firstgid)
                 if props.get("path"):
                     collision_trigger.add(tile["id"] + firstgid)
+                if props.get("consumable"):
+                    collision_consumables.add(tile["id"] + firstgid)
 
-        # Precompute gid → tileset map for faster lookup
         gid_to_tileset = []
         for i, ts in enumerate(tilesets):
             next_gid = tilesets[i + 1]["firstgid"] if i + 1 < len(tilesets) else 10**9
@@ -107,16 +116,20 @@ class Scene:
                     self.tiles.append(Tile(x, y))
                 elif gid in collision_trigger:
                     self.triggers.append(Trigger(x, y, "cave.json"))
+                elif gid in collision_consumables:
+                    self.consumables.append(Consumable(x, y, 10))
 
             framebuffer = Image.alpha_composite(framebuffer, layer_img)
 
-        # Parse map-level properties
         props = {p["name"]: p["value"] for p in data.get("properties", [])}
         start_x = props.get("start_location_x", 0)
         start_y = props.get("start_location_y", 0)
 
         if props.get("monster"):
-            self.entities.append(Enemy())
+            for i in range(0, 1):
+                en = Enemy()
+                en.current_location = (random.randint(350, 500 + 250), random.randint(500, 500 + 250))
+                self.entities.append(en)
 
         player = Player()
         player.current_location = (start_x, start_y)
@@ -127,22 +140,25 @@ class Scene:
         self.framebuffer_image = ImageTk.PhotoImage(framebuffer)
         print(f"Framebuffer: {(fb_width * fb_height * 4) / 1024 / 1024:.2f} MB")
 
+    def tick(self):
+        player = None
+        for entity in self.entities:
+            if isinstance(entity, Player):
+                player = entity
+
+        if player is None:
+            return
+
+        self.last_camera_location = player.current_location
+
     def draw(self, canvas):
         w = canvas.winfo_width()
         h = canvas.winfo_height()
         fb_w = self.framebuffer_image.width()
         fb_h = self.framebuffer_image.height()
 
-        if self.center_camera:
-            player = None
-            for entity in self.entities:
-                if isinstance(entity, Player):
-                    player = entity
-            offset_x = w / 2 - player.current_location[0]
-            offset_y = h / 2 - player.current_location[1]
-        else:
-            offset_x = (w - fb_w) / 2
-            offset_y = (h - fb_h) / 2
+        offset_x = w / 2 - self.last_camera_location[0]
+        offset_y = h / 2 - self.last_camera_location[1]
 
         canvas.create_rectangle(0, 0, w, h, fill="black", outline="")
         canvas.create_image(offset_x, offset_y, image=self.framebuffer_image, anchor="nw")

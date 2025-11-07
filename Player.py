@@ -1,7 +1,9 @@
 from Animation import Animation
 from Direction import Direction
 from Entity import Entity
-from texture2d import Texture2D
+from texture_atlas import TextureAtlas, Texture
+from ui.panel import Panel
+
 
 class Player(Entity):
     def __init__(self):
@@ -17,10 +19,20 @@ class Player(Entity):
         }
 
         self.animation_state = "Idle"
-        self.heart_texture = Texture2D("assets/Pixel Heart Sprite Sheet 32x32.png", 32, 32)
+
+        character_panel_atlas = TextureAtlas("assets/UI/character_panel.png")
+        tk_image = character_panel_atlas.sample_texture(0, 0, 86, 32, 4)
+        tk_image_health_bar = character_panel_atlas.sample_texture(14, 138, 66, 140, 4)
+
+        self.panel = Panel()
+        self.panel.add_element("player_bar", Texture(0, 0, tk_image))
+        self.panel.add_element("player_health_bar", Texture(118, 40, tk_image_health_bar))
 
     def attack(self, game):
         if self.animation_state == "Attack":
+            return
+
+        if self.attack_wait_timer <= 1.5:
             return
 
         self.animation_state = "Attack"
@@ -91,9 +103,24 @@ class Player(Entity):
             if trigger.location[0] <= x <= trigger.location[0] + 32 and trigger.location[1] <= y <= trigger.location[1] + 32:
                 game.load_scene(trigger.path)
 
+        for consumable in game.scene.consumables:
+            if consumable.location[0] <= x <= consumable.location[0] + 32 and consumable.location[1] <= y <= consumable.location[1] + 32:
+                game.scene.consumables.remove(consumable)
+                self.health += consumable.health
+                self.panel.get_element("player_health_bar").crop_width(self.health / 100)
+
         self.current_location = x, y
         self.last_direction = self.current_direction
         self.current_direction = direction
 
     def draw(self, canvas, offset_x, offset_y):
         super().draw(canvas, offset_x, offset_y)
+
+        self.panel.draw(canvas)
+
+    def on_attacked(self):
+        super().on_attacked()
+
+        self.attack_wait_timer = 0.0
+
+        self.panel.get_element("player_health_bar").crop_width(self.health / 100)

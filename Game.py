@@ -21,6 +21,8 @@ class Game:
                 self.controllers[0].possess(player)
 
     def tick(self, delta_time):
+        self.scene.tick()
+
         for obj in self.scene.entities:
             obj.tick(self, delta_time)
 

@@ -1,10 +1,10 @@
 import heapq
+import random
 
 from Animation import Animation
 from Direction import Direction
 from Entity import Entity
 from Player import Player
-
 
 def tile_from_pos(tile_size, pos):
     return int(pos[0] // tile_size), int(pos[1] // tile_size)
@@ -16,22 +16,25 @@ class Enemy(Entity):
     def __init__(self):
         super().__init__()
 
+        # Randomly select one of three textures
+
+        random_value = random.randint(1, 3)
+
         self.animation: dict[str, Animation] = {
-            "Idle": Animation("assets/Enemy/PNG/Orc1/With_shadow/orc1_idle_with_shadow.png", 64, 64, 2, [(Direction.DOWN, 4), (Direction.UP, 4), (Direction.LEFT, 4), (Direction.RIGHT, 4)], True),
-            "Walk": Animation("assets/Enemy/PNG/Orc1/With_shadow/orc1_walk_with_shadow.png", 64, 64, 2, [(Direction.DOWN, 6), (Direction.UP, 6), (Direction.LEFT, 6), (Direction.RIGHT, 6)], True),
-            "Hurt": Animation("assets/Enemy/PNG/Orc1/With_shadow/orc1_hurt_with_shadow.png", 64, 64, 2, [(Direction.DOWN, 6), (Direction.UP, 6), (Direction.LEFT, 6), (Direction.RIGHT, 6)], False),
-            "Death": Animation("assets/Enemy/PNG/Orc1/With_shadow/orc1_death_with_shadow.png", 64, 64, 2, [(Direction.DOWN, 8), (Direction.UP, 8), (Direction.LEFT, 8), (Direction.RIGHT, 8)], False),
-            "Attack": Animation("assets/Enemy/PNG/Orc1/With_shadow/orc1_attack_with_shadow.png", 64, 64, 2, [(Direction.DOWN, 8), (Direction.UP, 8), (Direction.LEFT, 8), (Direction.RIGHT, 8)], False),
+            "Idle": Animation(f"assets/Enemy/PNG/Orc{random_value}/With_shadow/orc{random_value}_idle_with_shadow.png", 64, 64, 2, [(Direction.DOWN, 4), (Direction.UP, 4), (Direction.LEFT, 4), (Direction.RIGHT, 4)], True),
+            "Walk": Animation(f"assets/Enemy/PNG/Orc{random_value}/With_shadow/orc{random_value}_walk_with_shadow.png", 64, 64, 2, [(Direction.DOWN, 6), (Direction.UP, 6), (Direction.LEFT, 6), (Direction.RIGHT, 6)], True),
+            "Hurt": Animation(f"assets/Enemy/PNG/Orc{random_value}/With_shadow/orc{random_value}_hurt_with_shadow.png", 64, 64, 2, [(Direction.DOWN, 6), (Direction.UP, 6), (Direction.LEFT, 6), (Direction.RIGHT, 6)], False),
+            "Death": Animation(f"assets/Enemy/PNG/Orc{random_value}/With_shadow/orc{random_value}_death_with_shadow.png", 64, 64, 2, [(Direction.DOWN, 8), (Direction.UP, 8), (Direction.LEFT, 8), (Direction.RIGHT, 8)], False),
+            "Attack": Animation(f"assets/Enemy/PNG/Orc{random_value}/With_shadow/orc{random_value}_attack_with_shadow.png", 64, 64, 2, [(Direction.DOWN, 8), (Direction.UP, 8), (Direction.LEFT, 8), (Direction.RIGHT, 8)], False),
         }
 
         self.animation_state = "Idle"
         self.points = []
         self.has_target = False
-        self.cooldown = 1
 
-    # ChatGPT has been used to help design the A* pathfinding algorithm
+    # Note: ChatGPT has been used to help design some parts of the A* pathfinding algorithm found in this function
     def move(self, game, delta_time, direction, sprint):
-        if self.animation_state == "Hurt":
+        if self.animation_state == "Hurt" or self.animation_state == "Death":
             return
 
         player = None
@@ -48,16 +51,41 @@ class Enemy(Entity):
         dx = player.current_location[0] - self.current_location[0]
         dy = player.current_location[1] - self.current_location[1]
         distance_sq = dx * dx + dy * dy
+
         if distance_sq < min_distance * min_distance:
             # Already close enough; stop moving
             self.points = []
 
-            if self.animation_state != "Attack" and self.cooldown > 1.0:
+            player = None
+            for entity in game.scene.entities:
+                if isinstance(entity, Player):
+                    player = entity
+                    break
+
+            if player is None:
+                return
+
+            if abs(dx) > abs(dy):
+                if dx > 0:
+                    self.current_direction = Direction.RIGHT
+                else:
+                    self.current_direction = Direction.LEFT
+            else:
+                if dy > 0:
+                    self.current_direction = Direction.DOWN
+                else:
+                    self.current_direction = Direction.UP
+
+            if self.animation_state != "Attack" and self.hurt_wait_timer > 1.5 and self.attack_wait_timer > 1:
+                player.on_attacked()
                 self.previous_animation_state = "Idle"
                 self.animation_state = "Attack"
                 self.animation[self.animation_state].reset()
 
             return
+
+        if distance_sq > min_distance * min_distance and self.has_target:
+            self.attack_wait_timer = 0
 
         if distance_sq > max_distance * max_distance and not self.has_target:
             self.points = []
@@ -83,14 +111,14 @@ class Enemy(Entity):
 
             for dx, dy in [(1, 0), (-1, 0), (0, 1), (0, -1)]:
                 nxt = (current[0] + dx, current[1] + dy)
-                if nxt in blocked:
-                    continue
+                if nxt in blocked or nxt in cost_so_far:
+                    continue  # already visited or blocked
+
                 new_cost = cost_so_far[current] + 1
-                if nxt not in cost_so_far or new_cost < cost_so_far[nxt]:
-                    cost_so_far[nxt] = new_cost
-                    priority = new_cost + heuristic(goal, nxt)
-                    heapq.heappush(frontier, (priority, nxt))
-                    came_from[nxt] = current
+                cost_so_far[nxt] = new_cost
+                priority = new_cost + heuristic(goal, nxt)
+                heapq.heappush(frontier, (priority, nxt))
+                came_from[nxt] = current
 
         if goal not in came_from:
             self.points = []
@@ -141,10 +169,9 @@ class Enemy(Entity):
         self.animation_state = "Walk"
 
     def tick(self, game, delta_time):
-        self.cooldown += delta_time
+        super().tick(game, delta_time)
 
         self.move(game, delta_time, Direction.DOWN, False)
-        super().tick(game, delta_time)
 
     def draw(self, canvas, offset_x, offset_y):
         super().draw(canvas, offset_x, offset_y)
@@ -161,17 +188,17 @@ class Enemy(Entity):
             bar_height = 5
             health_ratio = max(0, min(1, self.health / 100))
 
-            # bar position (same offset you used)
             x0 = x + offset_x - 40
             y0 = y + offset_y - 60
             x1 = x0 + bar_width
             y1 = y0 - bar_height
 
-            # background
+            # Background
             canvas.create_rectangle(x0, y1, x1, y0, fill="gray", outline="black", width=1)
+            # Foreground
 
-            # foreground (current health)
-            canvas.create_rectangle(x0, y1, x0 + bar_width * health_ratio, y0, fill="red", outline="")
+            if self.health > 0:
+                canvas.create_rectangle(x0, y1, x0 + bar_width * health_ratio, y0, fill="red", outline="")
 
         if self.debug_draw:
             tile_size = 32
@@ -185,4 +212,17 @@ class Enemy(Entity):
     def on_attacked(self):
         super().on_attacked()
 
-        self.cooldown = 0
+        (x, y) = self.current_location
+
+        match self.current_direction:
+            case Direction.UP:
+                self.current_location = (x, y - 10)
+            case Direction.DOWN:
+                self.current_location = (x, y + 10)
+            case Direction.LEFT:
+                self.current_location = (x + 10, y)
+            case Direction.RIGHT:
+                self.current_location = (x - 10, y)
+
+        self.hurt_wait_timer = 0
+

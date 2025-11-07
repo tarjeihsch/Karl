@@ -20,11 +20,16 @@ class Entity:
 
         self.debug_draw = False
 
-        self.collision_box_size = (64, 64)
+        self.collision_box_size = (128, 128)
+        self.hurt_wait_timer = 0
+        self.attack_wait_timer = 1.5
 
     def tick(self, game, delta_time):
         if self.animation_state is None:
             return
+
+        self.attack_wait_timer += delta_time
+        self.hurt_wait_timer += delta_time
 
         self.animation[self.animation_state].update(delta_time, self.current_direction)
 
@@ -32,6 +37,7 @@ class Entity:
             if self.animation_state == "Death":
                 game.remove_entity(self)
                 return
+
             self.animation_state = self.previous_animation_state
             self.animation[self.animation_state].reset()
 
@@ -56,28 +62,19 @@ class Entity:
         self.animation_state = "Death"
         self.animation[self.animation_state].reset()
 
+    def attack(self, game):
+        pass
+
     def on_attacked(self):
         if not self.animation[self.animation_state].cycle:
             # As the Hurt animation is a non-cyclic animation, we wait for the animation to finish before allowing a new attack.
             return
 
-        self.health -= 26
+        self.health -= 25
 
         if self.health <= 0:
             self.die()
             return
-
-        (x, y) = self.current_location
-
-        match self.current_direction:
-            case Direction.UP:
-                self.current_location = (x, y - 10)
-            case Direction.DOWN:
-                self.current_location = (x, y + 10)
-            case Direction.LEFT:
-                self.current_location = (x + 10, y)
-            case Direction.RIGHT:
-                self.current_location = (x - 10, y)
 
         # Cache the prev. animation index to restore after Hurt is played
         self.previous_animation_state = self.animation_state
